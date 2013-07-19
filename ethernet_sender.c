@@ -4,8 +4,10 @@
 #include <libnet.h>
 #include "pkt_sender.h"
 
-sender_p* pkt_sender_init(char* iface, unsigned char dst[MAC_LEN], unsigned char src[MAC_LEN])
+sender_p* pkt_sender_init(char* iface)
 {
+    unsigned char dst[MAC_LEN] = {0x60,0xde,0x44,0x75,0x14,0x49};//We will specify sender mac address and receiver mac address     manually for the first stage.Later we may run the arp protocol     and we will not need to specify the mac address.[But then we n    eed to specify ip address instead  
+    unsigned char src[MAC_LEN] = {0x60,0xde,0x44,0x75,0x14,0x2e};
     sender_p* sender = malloc(sizeof(sender_p));
     char err_buff[LIBNET_ERRBUF_SIZE];
     sender->l = libnet_init(LIBNET_LINK_ADV, iface, err_buff);//iface denotes the device we used to send the packets, such as 'etho', etc.
@@ -26,15 +28,7 @@ void pkt_sender_close(sender_p* sender)
     libnet_destroy(sender->l);
     free(sender);
 }
-/*
-int pkt_sender_send(sender_p* sender, char* data)
-{
-    unsigned data_len = sizeof(data);//data_len varies between 46 and 1500
-    //set up the payload of the packet
-    memset(data_p, 0, data_len);
-    memcpy(data_p, data, data_len);
-    pkt_sender_send_out(sender, data_p);
-*/
+
 int pkt_sender_send_out(sender_p* sender, char* data)
 {
     unsigned data_len = sizeof(data);//data_len varies between 46 and 1500
@@ -58,14 +52,15 @@ int pkt_sender_send_out(sender_p* sender, char* data)
 
     return 0;
 }
+
 int main()
 {
     char* iface="eth0";// We need to specify the device which send the packets
-    unsigned char dst[MAC_LEN] = {0x60,0xde,0x44,0x75,0x14,0x48};//We will specify sender mac address and receiver mac address manually for the first stage.Later we may run the arp protocol and we will not need to specify the mac address.[But then we need to specify ip address instead    
-    unsigned char src[MAC_LEN] = {0x60,0xde,0x44,0x75,0x14,0x46};
+    //unsigned char dst[MAC_LEN] = {0x60,0xde,0x44,0x75,0x14,0x3a};//We will specify sender mac address and receiver mac address manually for the first stage.Later we may run the arp protocol and we will not need to specify the mac address.[But then we need to specify ip address instead    
+    //unsigned char src[MAC_LEN] = {0x10,0x47,0x80,0x01,0x69,0xd8};
     int step;//when data size varies, "step" sets the step size
     sender_p* sender;
-    sender = pkt_sender_init(iface, dst[MAC_LEN], src[MAC_LEN]);
+    sender = pkt_sender_init(iface);
     char* data;
     int len;//Length of data that varies from 46 to 1500. We will manually decide the distribution of it.
     //We will manually decide the distribution of len here.
@@ -79,14 +74,23 @@ int main()
     //src = MAC_1;
     //dst = MAC_2;
     step = 2;
-
-
-    for(len = DATA_MIN_LEN; len ++; len <= DATA_MAX_LEN)
+    printf("bbbbbbbbb\n");
+    while(1)
     {
-        memset(data, 'k', len);//We will send 'k' to destinition hosts
-       // print("%s",data);
-        pkt_sender_send_out(sender, data);
+      len = 1024;
+      //for(len = DATA_MIN_LEN; len ++; len <= DATA_MAX_LEN)
+      //{
+          printf("come on, baby! %d       ",len);
+          memset(data, 'k', len);//We will send 'k' to destinition hosts
+         // print("%s",data);
+          printf("aaaaaaaaaaaa\n");
+          pkt_sender_send_out(sender, data
+                //}
+      printf("Success!\n");
+      //sleep(1);
     }
     pkt_sender_close(sender);
 }
+
+
 
